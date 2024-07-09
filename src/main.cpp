@@ -13,6 +13,10 @@ CRGB leds[NUM_LEDS];
 
 #define UPDATES_PER_SECOND 100
 
+uint8_t lastSecond = 99;
+uint8_t lastSecondHand = 99;
+uint8_t startIndex = 0;
+
 CRGBPalette16 currentPalette;
 TBlendType currentBlending;
 
@@ -30,9 +34,11 @@ bool isController = false; // flag to designate that this is the current control
 Scheduler userScheduler;
 painlessMesh mesh;
 
-void sendmsg(int mode)
+void sendmsg(int newPallette)
 {
-  mesh.sendBroadcast(String(mode));
+  Serial.printf("Broadcasting Pallette: %d", newPallette);
+  Serial.println();
+  mesh.sendBroadcast(String(newPallette));
 }
 
 void SetupTotallyRandomPalette()
@@ -74,62 +80,64 @@ void SetupPurpleAndGreenPalette()
 
 void SwitchPallete(uint8_t pallette)
 {
+  Serial.printf("Switching to Pallette: %d", pallette);
+  Serial.println();
+  
   switch (pallette)
   {
   case 0:
     currentPalette = RainbowColors_p;
     currentBlending = LINEARBLEND;
     break;
-  case 10:
+  case 1:
     currentPalette = RainbowStripeColors_p;
     currentBlending = NOBLEND;
     break;
-  case 15:
+  case 2:
     currentPalette = RainbowStripeColors_p;
     currentBlending = LINEARBLEND;
     break;
-  case 20:
+  case 3:
     SetupPurpleAndGreenPalette();
     currentBlending = LINEARBLEND;
     break;
-  case 25:
+  case 4:
     SetupTotallyRandomPalette();
     currentBlending = LINEARBLEND;
     break;
-  case 30:
+  case 5:
     SetupBlackAndWhiteStripedPalette();
     currentBlending = NOBLEND;
     break;
-  case 35:
+  case 6:
     SetupBlackAndWhiteStripedPalette();
     currentBlending = LINEARBLEND;
     break;
-  case 40:
+  case 7:
     currentPalette = CloudColors_p;
     currentBlending = LINEARBLEND;
     break;
-  case 45:
+  case 8:
     currentPalette = PartyColors_p;
     currentBlending = LINEARBLEND;
     break;
-  case 50:
+  case 9:
     currentPalette = myRedWhiteBluePalette_p;
     currentBlending = NOBLEND;
     break;
-  case 55:
+  case 10:
     currentPalette = myRedWhiteBluePalette_p;
     currentBlending = LINEARBLEND;
     break;
   }
 
-  sendmsg(pallette);
+  startIndex = 0;
 }
 
 void receivedCallback(uint32_t from, String &msg)
 {
-  Serial.printf("IsCtrl: %d Received from %u msg=%s\n", isController, from, msg.c_str());
-  if (!isController)
-    SwitchPallete(msg.toInt());
+  Serial.printf("IsCtrl: %d Received from %u Received Pallette=%s\n", isController, from, msg.c_str());
+  SwitchPallete(msg.toInt());
 }
 
 void newConnectionCallback(uint32_t nodeId)
@@ -194,8 +202,6 @@ void FillLEDsFromPaletteColors(uint8_t colorIndex)
 void ChangePalettePeriodically()
 {
   uint8_t secondHand = (millis() / 1000) % 60;
-  static uint8_t lastSecond = 99;
-  static uint8_t lastSecondHand = 99;
 
   if (lastSecond != secondHand)
   {
@@ -203,11 +209,9 @@ void ChangePalettePeriodically()
 
     if (secondHand == 0 || secondHand % 5 == 0)
     {
-      if (secondHand != lastSecondHand)
-      {
-        lastSecondHand = secondHand;
-        SwitchPallete(secondHand);
-      }
+      int newPallette = random(11);
+      sendmsg(newPallette);
+      SwitchPallete(newPallette);
     }
   }
 }
@@ -266,7 +270,7 @@ void loop()
 {
   mesh.update();
   digitalWrite(ledPin, LOW);
-  static uint8_t startIndex = 0;
+
   startIndex = startIndex + 1; /* motion speed */
 
   FillLEDsFromPaletteColors(startIndex);
