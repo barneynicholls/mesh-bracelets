@@ -1,12 +1,10 @@
 #include <Arduino.h>
 
-const int ledPin = 2; // Onboard LED is connected to GPIO2
-
 #include <FastLED.h>
 
 #define LED_PIN D4
-#define NUM_LEDS 10
-#define BRIGHTNESS 64
+#define NUM_LEDS 12
+#define BRIGHTNESS 50
 #define LED_TYPE WS2812B
 #define COLOR_ORDER RGB
 CRGB leds[NUM_LEDS];
@@ -245,9 +243,6 @@ void setup()
 {
   Serial.begin(115200);
 
-  pinMode(ledPin, OUTPUT); // Set the LED pin as an output
-  digitalWrite(ledPin, LOW);
-
   mesh.setDebugMsgTypes(ERROR | STARTUP);
 
   mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
@@ -255,9 +250,6 @@ void setup()
   mesh.onNewConnection(&newConnectionCallback);
   mesh.onChangedConnections(&changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-
-  // userScheduler.addTask(taskSendmsg);
-  // taskSendmsg.enable();
 
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
@@ -269,7 +261,6 @@ void setup()
 void loop()
 {
   mesh.update();
-  digitalWrite(ledPin, LOW);
 
   startIndex = startIndex + 1; /* motion speed */
 
