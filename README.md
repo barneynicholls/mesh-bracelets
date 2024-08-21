@@ -1,6 +1,6 @@
 # Wireless MESH LED Bracelets
 
-Hi this is the code for an instructable I've written which can be found here: [[https://www.instructables.com](https://www.instructables.com/Wireless-Mesh-Party-Bracelets)](https://www.instructables.com/Wireless-Mesh-Party-Bracelets/)
+Hi this is the code for an instructable I've written which can be found here: [https://www.instructables.com/Wireless-Mesh-Party-Bracelets](https://www.instructables.com/Wireless-Mesh-Party-Bracelets/)
 
 These bracelets will automatically connect and synchronize their LEDs.
 
